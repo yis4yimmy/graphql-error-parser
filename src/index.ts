@@ -1,9 +1,9 @@
 import { isApolloError } from "apollo-client";
 import { GraphQLError } from "graphql";
+import { SERVER_ERROR } from "./messages";
+import { processPostgresError } from "./databaseAdapters/Postgres";
 
-const SERVER_ERROR = "An internal server error occurred";
-
-type FieldErrors = {
+export type FieldErrors = {
   [name: string]: string[];
 };
 
@@ -29,6 +29,9 @@ const processGraphQLErrors = (glqErrors: readonly GraphQLError[]): FieldErrors =
     if (exception?.validationErrors) {
       const validationErrors = processValidationErrors(exception.validationErrors);
       memo = { ...memo, ...validationErrors };
+    } else if (exception?.code) {
+      const databaseErrors = processPostgresError(exception);
+      memo = { ...memo, ...databaseErrors };
     } else {
       memo.server = [SERVER_ERROR];
     }

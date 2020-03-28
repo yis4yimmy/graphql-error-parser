@@ -1,6 +1,8 @@
 import { ApolloError } from "apollo-client";
 import { GraphQLError } from "graphql";
+import { UNIQUE_VIOLATION } from "pg-error-constants";
 import { getFieldErrors } from "../index";
+import { PostgresQueryError } from "../databaseAdapters/Postgres";
 
 describe("getFieldErrors", () => {
   let subject: Error;
@@ -46,7 +48,7 @@ describe("getFieldErrors", () => {
       });
 
       describe("when the GraphQLErrors have extensions with an exception", () => {
-        describe("and the exception does not have validationErrors", () => {
+        describe("and the exception is not a validation or database error", () => {
           beforeEach(() => {
             const gqlError = new GraphQLError("Query failed", undefined, undefined, undefined, undefined, undefined, {
               exception: { message: "duplicate key error" },
@@ -58,6 +60,29 @@ describe("getFieldErrors", () => {
             expect(getFieldErrors(subject)).toEqual({
               server: ["An internal server error occurred"],
             });
+          });
+        });
+
+        describe("and the exception is a database error", () => {
+          beforeEach(() => {
+            const dbError: PostgresQueryError = {
+              code: UNIQUE_VIOLATION,
+              detail: "Key (email)=(joe@email.com) already taken",
+            };
+            const gqlError = new GraphQLError(
+              "INTERNAL_SERVER_ERROR",
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              { exception: { ...dbError } }
+            );
+            subject = new ApolloError({ graphQLErrors: [gqlError] });
+          });
+
+          it("returns the database error", () => {
+            expect(getFieldErrors(subject)).toEqual({ email: ["email joe@email.com already taken"] });
           });
         });
 
