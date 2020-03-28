@@ -1,0 +1,46 @@
+{
+  "name": "graphql-typeorm-error-parser",
+  "version": "1.0.0",
+  "description": "A utility for parsing graphql errors into form field errors",
+  "main": "lib/index.js",
+  "types": "lib/index.d.js",
+  "scripts": {
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p tsconfig.json",
+    "test": "jest",
+    "build": "tsc",
+    "prepare": "yarn run build",
+    "prepublishOnly": "yarn test && yarn run lint",
+    "preversion": "yarn run lint",
+    "version": "yarn run format && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yis4yimmy/graphql-typeorm-error-parser.git"
+  },
+  "keywords": [
+    "graphql",
+    "typeorm",
+    "class-validator",
+    "error"
+  ],
+  "author": "Jim Schuster",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yis4yimmy/graphql-typeorm-error-parser/issues"
+  },
+  "homepage": "https://github.com/yis4yimmy/graphql-typeorm-error-parser#readme",
+  "devDependencies": {
+    "@types/jest": "^25.1.4",
+    "jest": "^25.2.3",
+    "prettier": "^2.0.2",
+    "ts-jest": "^25.2.1",
+    "tslint": "^6.1.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.8.3"
+  },
+  "files": [
+    "lib/**/*"
+  ]
+}
