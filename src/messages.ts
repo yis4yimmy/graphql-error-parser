@@ -1,1 +1,1 @@
-export const SERVER_ERROR = "An internal server error occurred";
+export const SERVER_ERROR = "an internal server error occurred";

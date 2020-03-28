@@ -1,5 +1,5 @@
 import { UNIQUE_VIOLATION } from "pg-error-constants";
-import { FieldErrors } from "../index";
+import { Errors } from "../index";
 import { SERVER_ERROR } from "../messages";
 
 const UNIQUE_VIOLATION_DETAIL_PARTS = new RegExp(/^Key \((.*)\)=\((.*)\)\s(.*)$/);
@@ -9,7 +9,7 @@ export type PostgresQueryError = {
   detail: string;
 };
 
-export const processPostgresError = (error: PostgresQueryError): FieldErrors => {
+export const processPostgresError = (error: PostgresQueryError): Errors => {
   switch (error.code) {
     case UNIQUE_VIOLATION: {
       const detailParts = error.detail.match(UNIQUE_VIOLATION_DETAIL_PARTS);

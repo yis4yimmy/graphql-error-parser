@@ -4,6 +4,10 @@ import { SERVER_ERROR } from "./messages";
 import { processPostgresError } from "./databaseAdapters/Postgres";
 
 export type FieldErrors = {
+  [name: string]: string | string[];
+};
+
+export type Errors = {
   [name: string]: string[];
 };
 
@@ -14,8 +18,19 @@ type ValidationError = {
   constraints: { [name: string]: string };
 };
 
-const processValidationErrors = (validationErrors: [ValidationError]): FieldErrors => {
-  const fieldValidationErrors = validationErrors.reduce((memo: FieldErrors, error: ValidationError) => {
+type FieldErrorsAs = "array" | "string";
+
+type FieldErrorFormatting = "lowercase" | "sentence-case" | "none";
+
+export type FormatOptions = {
+  fieldErrorValues: {
+    as?: FieldErrorsAs;
+    format?: FieldErrorFormatting;
+  };
+};
+
+const processValidationErrors = (validationErrors: [ValidationError]): Errors => {
+  const fieldValidationErrors = validationErrors.reduce((memo: Errors, error: ValidationError) => {
     memo[error.property] = Object.values(error.constraints);
     return memo;
   }, {});
@@ -23,8 +38,8 @@ const processValidationErrors = (validationErrors: [ValidationError]): FieldErro
   return fieldValidationErrors;
 };
 
-const processGraphQLErrors = (glqErrors: readonly GraphQLError[]): FieldErrors => {
-  const errors = glqErrors.reduce((memo: FieldErrors, error) => {
+const processGraphQLErrors = (glqErrors: readonly GraphQLError[]): Errors => {
+  const errors = glqErrors.reduce((memo: Errors, error) => {
     const exception = error.extensions?.exception;
     if (exception?.validationErrors) {
       const validationErrors = processValidationErrors(exception.validationErrors);
@@ -42,10 +57,44 @@ const processGraphQLErrors = (glqErrors: readonly GraphQLError[]): FieldErrors =
   return errors;
 };
 
-export const getFieldErrors = (error: Error): FieldErrors => {
+const formatErrors = (errors: Errors, options: FormatOptions): FieldErrors => {
+  const format: FieldErrorFormatting = options.fieldErrorValues.format || "none";
+  const as: FieldErrorsAs = options.fieldErrorValues.as || "array";
+
+  const formattedErrors = Object.entries(errors).reduce((memo: FieldErrors, [field, messages]) => {
+    switch (format) {
+      case "lowercase":
+        messages = messages.map((message) => message.toLowerCase());
+        break;
+      case "sentence-case":
+        messages = messages.map((message) => message.charAt(0).toUpperCase() + message.slice(1));
+        break;
+      case "none":
+      default:
+        break;
+    }
+
+    if (as === "string") {
+      memo[field] = messages.join(", ");
+    } else {
+      memo[field] = messages;
+    }
+
+    return memo;
+  }, {});
+
+  return formattedErrors;
+};
+
+export const getFieldErrors = (
+  error: Error,
+  options: FormatOptions = { fieldErrorValues: { as: "array", format: "none" } }
+): FieldErrors => {
+  let fieldErrors: Errors = { server: [SERVER_ERROR] };
   if (isApolloError(error) && error.graphQLErrors.length) {
-    return processGraphQLErrors(error.graphQLErrors);
+    fieldErrors = processGraphQLErrors(error.graphQLErrors);
   }
 
-  return { server: [SERVER_ERROR] };
+  const formattedErrors = formatErrors(fieldErrors, options);
+  return formattedErrors;
 };
