@@ -18,5 +18,5 @@ something useful for doing field level validation in the UI.
 
 ## Roadmap
 
-* [ ] Ability to parse validation errors from class-validator
-* [ ] Ability to parse query errors from postgres
+- [x] Ability to parse validation errors from class-validator
+- [ ] Ability to parse query errors from postgres
