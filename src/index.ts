@@ -1,4 +1,4 @@
-import { isApolloError } from "apollo-client";
+import { isApolloError } from "@apollo/client";
 import { GraphQLError } from "graphql";
 import { SERVER_ERROR } from "./messages";
 import { processPostgresError } from "./databaseAdapters/Postgres";
