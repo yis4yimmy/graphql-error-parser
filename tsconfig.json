@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": ["es6", "es2017", "esnext"],
+    "lib": ["ES2016", "ES2017", "ESNEXT", "DOM"],
+    "esModuleInterop": true,
     "module": "commonjs",
     "declaration": true,
     "outDir": "./lib",
