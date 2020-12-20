@@ -1,4 +1,4 @@
-import { ApolloError } from "apollo-client";
+import { ApolloError } from "@apollo/client";
 import { GraphQLError } from "graphql";
 import { UNIQUE_VIOLATION } from "pg-error-constants";
 import { getFieldErrors, FormatOptions } from "../index";
