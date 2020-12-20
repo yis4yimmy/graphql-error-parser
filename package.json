@@ -1,6 +1,6 @@
 {
   "name": "graphql-typeorm-error-parser",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "description": "A utility for parsing graphql errors into form field errors",
   "main": "lib/index.js",
   "types": "lib/index.d.js",
